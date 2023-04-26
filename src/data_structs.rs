@@ -1,13 +1,14 @@
-use std::collections::HashMap;
+use serde::{Deserialize, Serialize};
 
-pub struct user_data_root {
+#[derive(Serialize, Deserialize, Debug)]
+pub struct UserDataRoot {
     pub name: &'static str,
     pub discrim_id: &'static str,
     pub nickname: &'static str,
     pub hash_pass: &'static str,
 }
 
-impl user_data_root {
+impl UserDataRoot {
     pub fn as_tuple(&self) -> [(&str, &str); 4] {
         [
             ("name", self.name),
