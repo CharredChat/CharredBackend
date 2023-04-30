@@ -5,10 +5,14 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/CharredChat/CharredBackend/routes"
+
 	"github.com/CharredChat/charrid/CharredProcess"
-	"github.com/gobwas/ws"
-	"github.com/gobwas/ws/wsutil"
 )
+
+func homePage(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello, World!")
+}
 
 func main() {
 	var proc = CharredProcess.New(127)
@@ -19,31 +23,11 @@ func main() {
 		return
 	}
 	fmt.Printf("ID: %X\n", test.AsUint64())
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		conn, _, _, err := ws.UpgradeHTTP(r, w)
-		if err != nil {
-			log.Fatal(err)
-			return
-		}
-		go func() {
-			defer conn.Close()
+	setupRoutes()
+	http.ListenAndServe(":8080", nil)
+}
 
-			for {
-				msg, op, err := wsutil.ReadClientData(conn)
-				if err != nil {
-					// handle error
-					log.Fatal(err)
-					return
-				}
-				err = wsutil.WriteServerMessage(conn, op, msg)
-				if err != nil {
-					// handle error
-					log.Fatal(err)
-					return
-				}
-			}
-		}()
-	})
-	http.ListenAndServe("127.0.0.1:8080", nil)
-
+func setupRoutes() {
+	http.HandleFunc("/", homePage)
+	http.HandleFunc("/ws", routes.WsEndpoint)
 }
