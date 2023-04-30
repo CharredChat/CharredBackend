@@ -16,6 +16,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	var proc = CharredProcess.New(127)
+	routes.Proc = proc
 	fmt.Println("Server starting.")
 	var test, err = proc.Generate()
 	if err != nil {
