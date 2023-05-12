@@ -1,6 +1,6 @@
 package comm
 
-type Message struct {
+type ReceiveMessage struct {
 	Op     uint64      `json:"op"`
 	OpData interface{} `json:"opdata"`
 }

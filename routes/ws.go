@@ -32,7 +32,7 @@ func WsEndpoint(w http.ResponseWriter, r *http.Request) {
 }
 
 func reader(conn *websocket.Conn) {
-	var incoming comm.Message
+	var incoming comm.ReceiveMessage
 	for {
 		err := conn.ReadJSON(&incoming)
 		if err != nil {
@@ -61,6 +61,12 @@ func reader(conn *websocket.Conn) {
 			say := comm.OpOne{Say: sayStr}
 
 			log.Println(say.Say)
+
+			err = conn.WriteJSON(comm.MessageResponse{ID: test.AsUint64()})
+			if err != nil {
+				log.Println(err)
+				return
+			}
 		}
 
 		log.Println(incoming.Op)
