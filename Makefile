@@ -16,3 +16,6 @@ endif
 clean:
 	go clean
 	rm -rf build
+
+proto-build:
+	protoc --go_out=./transactions --go_opt=paths=source_relative transactions.proto

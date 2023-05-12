@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option go_package = "github.com/CharredChat/CharredBackend/transactions;transactions";
+
+package transactions;
+
+message Request {
+  uint32 op = 1;
+  oneof op_data {
+    AuthRequest auth_request = 2;
+  }
+}
+
+message AuthRequest {
+  string say = 1;
+}
