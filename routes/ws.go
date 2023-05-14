@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/CharredChat/CharredBackend/comm"
 	"github.com/CharredChat/CharredBackend/transactions"
 	"github.com/CharredChat/charrid/CharredProcess"
 	"github.com/gorilla/websocket"
@@ -55,13 +54,26 @@ func reader(conn *websocket.Conn) {
 
 		log.Println(test.AsUint64())
 
-		switch opdata := incoming.OpData.(type) {
+		switch op := incoming.Op.(type) {
 		case *transactions.Request_AuthRequest_:
-			sayStr := opdata.AuthRequest.GetSay()
-
+			sayStr := op.AuthRequest.GetSay()
 			log.Println(sayStr)
 
-			err = conn.WriteJSON(comm.MessageResponse{ID: test.AsUint64()})
+			var resp = transactions.Response{
+				Op: &transactions.Response_MessageCreatedResponse_{
+					MessageCreatedResponse: &transactions.Response_MessageCreatedResponse{
+						Id: test.AsUint64(),
+					},
+				},
+			}
+
+			respdata, err := proto.Marshal(&resp)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			err = conn.WriteMessage(websocket.BinaryMessage, respdata)
 			if err != nil {
 				log.Println(err)
 				return

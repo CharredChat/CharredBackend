@@ -8,7 +8,20 @@ message Request {
   message AuthRequest {
     string say = 1;
   }
-  oneof op_data {
+  oneof op {
     AuthRequest auth_request = 1;
+  }
+}
+
+message Response {
+  message TokenResponse {
+    string token = 1;
+  }
+  message MessageCreatedResponse {
+    uint64 id = 1;
+  }
+  oneof op {
+    TokenResponse token_response = 1;
+    MessageCreatedResponse message_created_response = 2;
   }
 }
