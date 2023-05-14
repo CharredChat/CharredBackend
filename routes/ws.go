@@ -5,8 +5,10 @@ import (
 	"net/http"
 
 	"github.com/CharredChat/CharredBackend/comm"
+	"github.com/CharredChat/CharredBackend/transactions"
 	"github.com/CharredChat/charrid/CharredProcess"
 	"github.com/gorilla/websocket"
+	"google.golang.org/protobuf/proto"
 )
 
 var Proc CharredProcess.CharredProcess
@@ -32,9 +34,14 @@ func WsEndpoint(w http.ResponseWriter, r *http.Request) {
 }
 
 func reader(conn *websocket.Conn) {
-	var incoming comm.ReceiveMessage
 	for {
-		err := conn.ReadJSON(&incoming)
+		incoming := &transactions.Request{}
+		_, message, err := conn.ReadMessage()
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		err = proto.Unmarshal(message, incoming)
 		if err != nil {
 			log.Println(err)
 			return
@@ -48,32 +55,17 @@ func reader(conn *websocket.Conn) {
 
 		log.Println(test.AsUint64())
 
-		switch incoming.Op {
-		case 1:
-			sayMsg, ok := incoming.OpData.(map[string]interface{})
-			if !ok {
-				return
-			}
-			sayStr, ok := sayMsg["say"].(string)
-			if !ok {
-				return
-			}
-			say := comm.OpOne{Say: sayStr}
+		switch opdata := incoming.OpData.(type) {
+		case *transactions.Request_AuthRequest_:
+			sayStr := opdata.AuthRequest.GetSay()
 
-			log.Println(say.Say)
+			log.Println(sayStr)
 
 			err = conn.WriteJSON(comm.MessageResponse{ID: test.AsUint64()})
 			if err != nil {
 				log.Println(err)
 				return
 			}
-		}
-
-		log.Println(incoming.Op)
-		err = conn.WriteJSON(incoming)
-		if err != nil {
-			log.Println(err)
-			return
 		}
 	}
 }
